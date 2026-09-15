@@ -6,7 +6,7 @@
 
 | ID | Epic | Priority |
 |---|---|---|
-| DMS-01 |  | Document store & archiving::P1 |
-| DMS-02 |  | Document generation & templates::P2 |
-| DMS-03 |  | OCR/IDP ingestion pipeline::P2 |
-| DMS-04 |  | E-signature integration::P3 |
+| DMS-01 | Document store & archiving | P1 |
+| DMS-02 | Document generation & templates | P2 |
+| DMS-03 | OCR/IDP ingestion pipeline | P2 |
+| DMS-04 | E-signature integration | P3 |
