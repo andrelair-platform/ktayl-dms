@@ -1,8 +1,9 @@
 """L1 unit — the FastAPI surface (indra mocked, no real model)."""
 
+from fastapi.testclient import TestClient
+
 import app.ocr as ocr_mod
 from app.main import app
-from fastapi.testclient import TestClient
 
 
 def test_health(monkeypatch) -> None:
