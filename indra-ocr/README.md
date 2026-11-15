@@ -25,9 +25,11 @@ no secrets.
 
 ## The model is baked into the image
 
-The ~76 MB indra model is downloaded **at image-build time** (`Dockerfile`) because the runtime cluster
-is default-deny-egress — there is **no** HuggingFace fetch at run time. `INDRA_OCR_MODEL_DIR` points at
-the baked directory.
+The ~76 MB indra model (`datalab-to/indra-ocr`) is downloaded into the image's **HuggingFace cache**
+(`HF_HOME`) **at image-build time** (`Dockerfile`), and the runtime runs with **`HF_HUB_OFFLINE=1`** —
+because the runtime cluster is default-deny-egress, there is **no** HuggingFace fetch at run time.
+(indra only auto-downloads when `INDRA_OCR_MODEL_DIR` is unset — so we bake the HF cache, not a custom
+model dir.)
 
 ## Local dev
 
