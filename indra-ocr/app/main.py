@@ -18,6 +18,7 @@ from contextlib import asynccontextmanager
 from typing import Annotated
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import JSONResponse, Response
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 
@@ -66,7 +67,10 @@ async def run_ocr(file: Annotated[UploadFile, File()]) -> JSONResponse:
             tmp.write(data)
             tmp_path = tmp.name
         start = time.perf_counter()
-        result = ocr.run_ocr(tmp_path)
+        # OCR is a synchronous, CPU-bound call — run it in a worker thread so it never blocks the
+        # event loop (otherwise a single in-flight OCR starves the /health probes → liveness kills
+        # the pod mid-request under classifier load).
+        result = await run_in_threadpool(ocr.run_ocr, tmp_path)
         _LATENCY.observe(time.perf_counter() - start)
         _REQUESTS.labels("ok").inc()
         return JSONResponse(result)
