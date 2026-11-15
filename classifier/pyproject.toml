@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dms-classifier"
+version = "0.1.0"
+description = "DMS document classifier — matches a scanned doc to its claim#/policy#/client (ktayl-dms #24)"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.32",
+  "httpx>=0.27",
+  "nats-py>=2.6",
+  "openai>=1.54",
+  "langfuse>=2.53,<3",
+  "prometheus-client>=0.21",
+  "pydantic>=2.9",
+  "pydantic-settings>=2.5",
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest>=8",
+  "pytest-asyncio>=0.24",
+  "respx>=0.21",
+  "httpx>=0.27",
+  "ruff>=0.7",
+  "mypy>=1.11",
+]
+
+[tool.setuptools]
+packages = ["app"]
+
+[tool.ruff]
+line-length = 120   # the classifier carries dense domain docstrings (flow/controls); 120 keeps them one line
+
+[tool.ruff.lint]
+# Explicit rule set (deterministic local==CI). Deliberately excludes flake8-bandit (S) and
+# flake8-blind-except (BLE): this worker INTENTIONALLY swallows best-effort errors (tracing, prompt
+# fetch, parse fallbacks) so a tracing/parse hiccup never blocks a filing — the catch-all in main
+# redelivers via NATS. Keeps the high-value rules (pyflakes, isort, bugbear, pyupgrade, simplify).
+select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = false
+
+[[tool.mypy.overrides]]
+module = ["nats.*", "langfuse.*"]
+ignore_missing_imports = true
