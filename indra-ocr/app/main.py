@@ -15,6 +15,7 @@ import tempfile
 import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from typing import Annotated
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import JSONResponse, Response
@@ -49,7 +50,7 @@ def metrics() -> Response:
 
 
 @app.post("/ocr")
-async def run_ocr(file: UploadFile = File(...)) -> JSONResponse:
+async def run_ocr(file: Annotated[UploadFile, File()]) -> JSONResponse:
     data = await file.read()
     if not data:
         _REQUESTS.labels("bad_request").inc()
@@ -71,7 +72,7 @@ async def run_ocr(file: UploadFile = File(...)) -> JSONResponse:
         return JSONResponse(result)
     except HTTPException:
         raise
-    except Exception as exc:  # noqa: BLE001 — surface a clean 500, never leak a stack to the caller
+    except Exception as exc:  # surface a clean 500, never leak a stack trace to the caller
         _REQUESTS.labels("error").inc()
         raise HTTPException(status_code=500, detail=f"ocr failed: {type(exc).__name__}") from exc
     finally:
