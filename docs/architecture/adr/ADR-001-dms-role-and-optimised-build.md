@@ -27,7 +27,7 @@ any single domain's request path (it's a capability, not a hard dependency).
 ## Decision 2 — Adopt the engine, reuse the platform, build only the glue (`architecture-strategy.md` split)
 | Part | Decision | Tool |
 |---|---|---|
-| Capture / **OCR** (PDF+image) / **full-text search** / store / UI | **ADOPT** | **Paperless-ngx** — OCR (Tesseract/OCRmyPDF) **and** search (Whoosh) are **built into the main container**: **no Elasticsearch, no OCR sidecar** for the common insurance doc |
+| Capture / **OCR** (PDF+image) / **full-text search** / store / UI | **ADOPT** | **Paperless-ngx** — ~~OCR (Tesseract/OCRmyPDF)~~ **and** search (Whoosh) are **built into the main container**: **no Elasticsearch, no OCR sidecar** for the common insurance doc. ⚠️ **The OCR element is SUPERSEDED by [ADR-002](./ADR-002-ocr-engine-indra.md):** scan/image OCR moved to the self-hosted **indra** engine (CPU-only, far higher accuracy on handwriting/tables/poor scans — Phase-2 match accuracy depends on it). Paperless keeps its built-in Tesseract as the reversible fallback. |
 | **Matching** (a doc → its claim#/policy#/client) — the real value-add | **BUILD (governed AI glue)** | **reuse the live AI platform** (LiteLLM + Qdrant + Langfuse): a small event-driven worker extracts the business key + files the doc; **no new ML infra** |
 | **E-signature** | **ADOPT (already live)** | **Docuseal** (ns `sign`, running) |
 | **Doc generation** (policy PDF / attestation) | **BUILD (per-domain lib)** | a PDF/template library *in the owning ktayl-core module* — ~zero standing pods |
