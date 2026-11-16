@@ -12,6 +12,7 @@ from __future__ import annotations
 import httpx
 from pydantic import BaseModel
 
+from app.auth import auth_headers
 from app.config import settings
 from app.extract import Candidate
 
@@ -19,10 +20,6 @@ from app.extract import Candidate
 class Validation(BaseModel):
     exists: bool = False
     record_client: str | None = None
-
-
-def _headers() -> dict[str, str]:
-    return {"Authorization": f"Bearer {settings.lookup_bearer}"} if settings.lookup_bearer else {}
 
 
 def _client_of(record: dict) -> str | None:
@@ -38,9 +35,10 @@ async def validate(cand: Candidate) -> Validation:
         return Validation(exists=False)
     base = settings.claims_lookup_url if cand.kind == "claim" else settings.policy_lookup_url
     url = f"{base.rstrip('/')}/{cand.number}"
+    headers = await auth_headers()
     async with httpx.AsyncClient(timeout=settings.http_timeout_seconds) as client:
         try:
-            resp = await client.get(url, headers=_headers())
+            resp = await client.get(url, headers=headers)
         except httpx.HTTPError:
             return Validation(exists=False)
     if resp.status_code != 200:
