@@ -39,8 +39,8 @@ def test_default_when_unmapped():
 
 
 def test_keep_until_adds_window():
-    assert keep_until("2020-06-15", "policy") == dt.date(2030, 6, 15)   # 10y
-    assert keep_until("2020-06-15", "kyc") == dt.date(2025, 6, 15)      # 5y
+    assert keep_until("2020-06-15", "policy") == dt.date(2030, 6, 15)  # 10y
+    assert keep_until("2020-06-15", "kyc") == dt.date(2025, 6, 15)  # 5y
     assert keep_until("2020-06-15", "internal") == dt.date(2023, 6, 15)  # 3y
 
 
