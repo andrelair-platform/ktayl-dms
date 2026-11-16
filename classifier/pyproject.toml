@@ -17,6 +17,7 @@ dependencies = [
   "prometheus-client>=0.21",
   "pydantic>=2.9",
   "pydantic-settings>=2.5",
+  "boto3>=1.35",
 ]
 
 [project.optional-dependencies]
@@ -54,5 +55,5 @@ python_version = "3.12"
 ignore_missing_imports = false
 
 [[tool.mypy.overrides]]
-module = ["nats.*", "langfuse.*"]
+module = ["nats.*", "langfuse.*", "boto3.*", "botocore.*"]
 ignore_missing_imports = true

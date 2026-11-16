@@ -56,5 +56,16 @@ class Settings(BaseSettings):
     confidence_threshold: float = 0.7
     http_timeout_seconds: float = 30.0
 
+    # --- retention / offsite archival (the archive-only CronJob; see docs/retention-policy.md) ---
+    # ARCHIVE-ONLY + DRY-RUN by default: with retention_dry_run=true the job only REPORTS what it would
+    # archive. It has NO delete path. R2 creds come from ESO (Vault platform/cloudflare).
+    retention_dry_run: bool = True
+    r2_endpoint: str = ""          # https://<account>.r2.cloudflarestorage.com
+    r2_bucket: str = "dms-archive"
+    r2_access_key: str = ""
+    r2_secret_key: str = ""
+    archive_prefix: str = "dms-archive"
+    archived_tag: str = "archived"
+
 
 settings = Settings()
