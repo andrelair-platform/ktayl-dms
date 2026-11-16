@@ -60,7 +60,7 @@ class Settings(BaseSettings):
     # ARCHIVE-ONLY + DRY-RUN by default: with retention_dry_run=true the job only REPORTS what it would
     # archive. It has NO delete path. R2 creds come from ESO (Vault platform/cloudflare).
     retention_dry_run: bool = True
-    r2_endpoint: str = ""          # https://<account>.r2.cloudflarestorage.com
+    r2_endpoint: str = ""  # https://<account>.r2.cloudflarestorage.com
     r2_bucket: str = "dms-archive"
     r2_access_key: str = ""
     r2_secret_key: str = ""

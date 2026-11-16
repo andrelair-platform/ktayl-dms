@@ -99,18 +99,30 @@ async def run() -> dict[str, int]:
             fname = doc.get("original_file_name") or f"{doc['id']}"
             key = f"{settings.archive_prefix}/{cls}/{ku.year}/{doc['id']}/{fname}"
             meta = {
-                "id": doc["id"], "retention_class": cls, "keep_until": ku.isoformat(),
-                "created": doc.get("created"), "title": doc.get("title"),
+                "id": doc["id"],
+                "retention_class": cls,
+                "keep_until": ku.isoformat(),
+                "created": doc.get("created"),
+                "title": doc.get("title"),
             }
             if settings.retention_dry_run:
-                log.info("DRY-RUN would archive doc %s → s3://%s/%s (keep_until %s)",
-                         doc["id"], settings.r2_bucket, key, ku.isoformat())
+                log.info(
+                    "DRY-RUN would archive doc %s → s3://%s/%s (keep_until %s)",
+                    doc["id"],
+                    settings.r2_bucket,
+                    key,
+                    ku.isoformat(),
+                )
             else:
                 assert s3 is not None  # non-dry-run ⇒ the R2 client was built above
                 content = await pl.download(doc["id"])
                 s3.put_object(Bucket=settings.r2_bucket, Key=key, Body=content)
-                s3.put_object(Bucket=settings.r2_bucket, Key=key + ".meta.json",
-                              Body=json.dumps(meta).encode(), ContentType="application/json")
+                s3.put_object(
+                    Bucket=settings.r2_bucket,
+                    Key=key + ".meta.json",
+                    Body=json.dumps(meta).encode(),
+                    ContentType="application/json",
+                )
                 await pl.add_named_tag(doc, settings.archived_tag)  # idempotency marker (only after a real upload)
                 log.info("archived doc %s → s3://%s/%s", doc["id"], settings.r2_bucket, key)
             stats["archived"] += 1
