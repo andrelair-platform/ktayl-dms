@@ -41,7 +41,16 @@ class Settings(BaseSettings):
     # --- Systems of record (validate the candidate) — exact routes are deploy-time values ---
     claims_lookup_url: str = "http://ktayl-claims.ktayl-claims.svc:8080/api/claims"
     policy_lookup_url: str = "http://ktayl-core.ktayl-core.svc:8080/api/billing/policies"
-    lookup_bearer: str = ""  # optional M2M bearer (SEC-03); empty on an open dev lookup
+    lookup_bearer: str = ""  # optional static M2M bearer (SEC-03); empty on an open dev lookup
+
+    # --- M2M auth to the systems of record (SEC-03; Authentik client-credentials) ---
+    # When all three are set, the worker mints an access token from Authentik and sends it on every
+    # lookup; the target services validate it against Authentik's JWKS. Empty ⇒ falls back to
+    # lookup_bearer / unauthenticated (keeps the dev image env-agnostic).
+    oidc_token_url: str = ""  # e.g. https://auth.10.0.0.200.nip.io/application/o/dms-classifier/token/
+    oidc_client_id: str = ""
+    oidc_client_secret: str = ""
+    oidc_scope: str = ""  # optional space-separated scopes (e.g. "claims:read policies:read")
 
     # --- behaviour ---
     confidence_threshold: float = 0.7
