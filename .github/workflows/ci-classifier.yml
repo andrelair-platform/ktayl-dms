@@ -18,8 +18,6 @@ permissions:
   contents: read
 
 env:
-  REGISTRY:   harbor.10.0.0.200.nip.io
-  IMAGE_NAME: library/dms-classifier
   GHCR_IMAGE: ghcr.io/andrelair-platform/dms-classifier
 
 defaults:
