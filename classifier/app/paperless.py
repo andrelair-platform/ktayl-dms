@@ -90,3 +90,44 @@ class Paperless:
 
     async def mark_needs_review(self, doc: dict[str, Any]) -> None:
         await self._add_tag(doc, TAG_NEEDS_REVIEW)
+
+    # --- retention/archival helpers (additive; used by the archive-only retention job) ---
+
+    async def list_documents(self) -> list[dict[str, Any]]:
+        """All documents (paginated). Read-only; used by the retention CronJob to pick un-archived docs."""
+        out: list[dict[str, Any]] = []
+        async with self._client() as c:
+            url: str | None = "/api/documents/?page_size=100&ordering=id"
+            while url:
+                r = await c.get(url)
+                r.raise_for_status()
+                page = r.json()
+                out.extend(page.get("results", []))
+                nxt = page.get("next")
+                # `next` is an absolute URL; httpx AsyncClient honours it relative to base_url
+                url = nxt.replace(settings.paperless_url, "") if nxt else None
+        return out
+
+    async def ensure_tag(self, name: str) -> int:
+        """Get-or-create a tag by name; returns its id and refreshes the local map (idempotent)."""
+        async with self._client() as c:
+            existing = (await c.get(f"/api/tags/?name__iexact={name}")).json().get("results", [])
+            if existing:
+                tid = existing[0]["id"]
+            else:
+                r = await c.post("/api/tags/", json={"name": name})
+                r.raise_for_status()
+                tid = r.json()["id"]
+        self._tag_ids[name] = tid
+        return tid
+
+    async def add_named_tag(self, doc: dict[str, Any], tag_name: str) -> None:
+        """Public: ensure the tag exists then attach it (merged with existing tags)."""
+        await self.ensure_tag(tag_name)
+        await self._add_tag(doc, tag_name)
+
+    def field_id_to_name(self) -> dict[int, str]:
+        return {v: k for k, v in self._field_ids.items()}
+
+    def tag_id_to_name(self) -> dict[int, str]:
+        return {v: k for k, v in self._tag_ids.items()}
